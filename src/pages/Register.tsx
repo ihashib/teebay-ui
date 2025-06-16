@@ -64,9 +64,7 @@ export default function Register() {
     });
     
     navigate('/login');
-  } catch (err) {
-  q
-  }
+  } catch (err) {}
 };
 
   return (
