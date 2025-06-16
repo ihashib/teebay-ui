@@ -23,3 +23,16 @@ export const REGISTER_MUTATION = gql`
     }
   }
 `;
+
+export const CREATE_PRODUCT_MUTATION = gql`
+  mutation CreateProduct($input: ProductInput!) {
+    createProduct(input: $input) {
+      id
+      title
+      owner {
+        id
+        email
+      }
+    }
+  }
+`;

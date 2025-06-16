@@ -19,7 +19,7 @@ export const GET_ALL_PRODUCTS = gql`
 
 export const GET_MY_PRODUCTS = gql`
   query GetMyProducts {
-    myProducts {
+    userProducts {
       id
       title
       description
@@ -32,7 +32,7 @@ export const GET_MY_PRODUCTS = gql`
 
 export const GET_MY_ORDERS = gql`
   query GetMyOrders {
-    myOrders {
+    buyerOrders {
       id
       type
       rentStart

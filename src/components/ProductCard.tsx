@@ -1,8 +1,9 @@
-import { Card, Image, Text, Group, Button } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Card, Image, Text, Group, Button, Modal } from '@mantine/core';
 import { useMutation } from '@apollo/client';
 import { DELETE_PRODUCT } from '../graphql/mutations';
-import { GET_MY_PRODUCTS, GET_ALL_PRODUCTS } from '../graphql/queries';
+import { GET_MY_PRODUCTS } from '../graphql/queries';
+import { useNavigate } from 'react-router-dom';
 
 interface ProductCardProps {
   product: {
@@ -14,22 +15,21 @@ interface ProductCardProps {
     rentUnit: string;
     owner: { id: string; email: string };
   };
+  refetch: () => void; // Add refetch as a prop
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, refetch }: ProductCardProps) {
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [deleteProduct, { loading }] = useMutation(DELETE_PRODUCT, {
     variables: { productId: product.id },
     update(cache) {
+      // Optimistically update the cache if needed
       cache.modify({
         fields: {
           myProducts(existingRefs = [], { readField }) {
-            return existingRefs.filter(
-              (ref: any) => readField('id', ref) !== product.id
-            );
-          },
-          products(existingRefs = [], { readField }) {
             return existingRefs.filter(
               (ref: any) => readField('id', ref) !== product.id
             );
@@ -39,11 +39,30 @@ export default function ProductCard({ product }: ProductCardProps) {
     },
   });
 
+  const handleDeleteClick = () => {
+    setIsModalOpen(true); // Open confirmation modal
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteProduct(); // Perform the deletion mutation
+      refetch(); // Refetch "My Products" after deletion
+      setIsModalOpen(false); // Close modal after deletion
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
+    setIsDeleting(false);
+  };
+
+  const handleCancelDelete = () => {
+    setIsModalOpen(false); // Close modal if user cancels
+  };
+
   return (
     <Card shadow="sm" p="lg" radius="md" withBorder>
       <Image src="/placeholder.png" height={160} alt={product.title} />
 
-      {/* fw (font-weight) and fz (font-size) replace weight/size :contentReference[oaicite:0]{index=0} */}
       <Text fw={500} fz="lg" mt="md">
         {product.title}
       </Text>
@@ -52,11 +71,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         {product.description}
       </Text>
 
-      {/* justify replaces position="apart" :contentReference[oaicite:1]{index=1} */}
       <Group justify="space-between" mt="md">
         <Text fw={700}>${product.price.toFixed(2)}</Text>
 
-        {/* gap replaces spacing :contentReference[oaicite:2]{index=2} */}
         <Group gap="xs">
           <Button
             size="xs"
@@ -69,7 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             size="xs"
             color="red"
             loading={loading}
-            onClick={() => deleteProduct()}
+            onClick={handleDeleteClick}
           >
             Delete
           </Button>
@@ -84,6 +101,29 @@ export default function ProductCard({ product }: ProductCardProps) {
           Rent
         </Button>
       </Group>
+
+      {/* Confirmation Modal */}
+      <Modal
+        opened={isModalOpen}
+        onClose={handleCancelDelete}
+        title="Confirm Deletion"
+      >
+        <Text size="sm">
+          Are you sure you want to delete this product? This action cannot be undone.
+        </Text>
+        <Group mt="md">
+          <Button onClick={handleCancelDelete} variant="outline">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="red"
+            loading={isDeleting}
+          >
+            Delete
+          </Button>
+        </Group>
+      </Modal>
     </Card>
   );
 }

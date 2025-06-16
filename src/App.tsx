@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import AddProductWizard from './pages/AddProductWizard';
 
 export default function App() {
   return (
@@ -11,7 +12,7 @@ export default function App() {
       <Route path="/register" element={<Register />} />
 
       <Route
-        path="/"
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />
@@ -19,6 +20,7 @@ export default function App() {
         }
       />
 
+      <Route path="/products/add" element={<AddProductWizard />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
