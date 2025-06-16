@@ -2,13 +2,14 @@ import { useForm } from '@mantine/form';
 import {
   TextInput,
   PasswordInput,
-  Select,
   Button,
   Paper,
   Title,
   Text,
   Anchor,
   Center,
+  Grid,
+  Checkbox,
 } from '@mantine/core';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
@@ -17,6 +18,7 @@ import { REGISTER_MUTATION } from '../graphql/mutations';
 interface RegisterFormValues {
   email: string;
   password: string;
+  confirmPassword: string;
   firstName: string;
   lastName: string;
   address: string;
@@ -31,6 +33,7 @@ export default function Register() {
     initialValues: {
       email: '',
       password: '',
+      confirmPassword: '',
       firstName: '',
       lastName: '',
       address: '',
@@ -38,65 +41,135 @@ export default function Register() {
       userType: 'USER',
     },
     validate: {
-      email: (v) => (/^\S+@\S+\.\S+$/.test(v) ? null : 'Invalid email'),
-      password: (v) => (v.length >= 3 ? null : 'Password at least 3 chars'),
-      firstName: (v) => (v ? null : 'Required'),
-      lastName: (v) => (v ? null : 'Required'),
-      address: (v) => (v ? null : 'Required'),
-      phoneNumber: (v) => (v ? null : 'Required'),
+      email: (v) =>
+        /^\S+@\S+\.\S+$/.test(v) ? null : 'Invalid email format', 
+      phoneNumber: (v) =>
+        /^[0-9]{11}$/.test(v) ? null : 'Phone number must be 10 digits', 
+      password: (v) =>
+        v.length >= 6 ? null : 'Password must be at least 6 characters', 
+      firstName: (v) => (v ? null : 'First name is required'),
+      lastName: (v) => (v ? null : 'Last name is required'),
+      address: (v) => (v ? null : 'Address is required'),
+      confirmPassword: (v, values) =>
+        v === values.password ? null : 'Passwords must match',
     },
   });
 
   const handleSubmit = async (values: RegisterFormValues) => {
-    try {
-      await register({ variables: { input: values } });
-      navigate('/login');
-    } catch {
-      // show error below
-    }
-  };
+  try {
+    const { confirmPassword, ...restOfValues } = values;
+
+    await register({
+      variables: { input: restOfValues }, 
+    });
+    
+    navigate('/login');
+  } catch (err) {
+  q
+  }
+};
 
   return (
     <Center style={{ width: '100%', height: '100vh' }}>
-      <Paper radius="md" withBorder p="xl" style={{ maxWidth: 400, width: '100%' }}>
+      <div style={{ width: '100%', maxWidth: 650 }}>
         <Title order={2} mb="lg" style={{ textAlign: 'center' }}>
           SIGN UP
         </Title>
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <TextInput label="First Name" required mb="sm" {...form.getInputProps('firstName')} />
-          <TextInput label="Last Name" required mb="sm" {...form.getInputProps('lastName')} />
-          <TextInput label="Email" required mb="sm" {...form.getInputProps('email')} />
-          <PasswordInput label="Password" required mb="sm" {...form.getInputProps('password')} />
-          <TextInput label="Address" required mb="sm" {...form.getInputProps('address')} />
-          <TextInput label="Phone" required mb="sm" {...form.getInputProps('phoneNumber')} />
-          <Select
-            label="User Type"
-            data={[
-              { value: 'USER', label: 'User' },
-              { value: 'ADMIN', label: 'Admin' },
-            ]}
-            mb="md"
-            {...form.getInputProps('userType')}
-          />
+        <Paper radius="md" withBorder p="xl" style={{ maxWidth: 650, width: '100%' }}>
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Grid gutter="sm">
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  placeholder="First Name"
+                  {...form.getInputProps('firstName')}
+                  mt="sm"
+                  mb="sm"
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  placeholder="Last Name"
+                  {...form.getInputProps('lastName')}
+                  mt="sm"
+                  mb="sm"
+                />
+              </Grid.Col>
+            </Grid>
 
-          {error && (
-            <Text color="red" size="sm" mb="sm">
-              {(error as Error).message}
+            <TextInput
+              required
+              placeholder="Address"
+              {...form.getInputProps('address')}
+              mt="sm"
+              mb="sm"
+            />
+
+            <Grid gutter="sm">
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  placeholder="Phone Number"
+                  {...form.getInputProps('phoneNumber')}
+                  mt="sm"
+                  mb="sm"
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <TextInput
+                  required
+                  placeholder="Email"
+                  {...form.getInputProps('email')}
+                  mt="sm"
+                  mb="sm"
+                />
+              </Grid.Col>
+            </Grid>
+
+            <PasswordInput
+              required
+              placeholder="Password"
+              {...form.getInputProps('password')}
+              mt="sm"
+              mb="sm"
+            />
+            <PasswordInput
+              required
+              placeholder="Confirm Password"
+              {...form.getInputProps('confirmPassword')}
+              mt="sm"
+              mb="sm"
+            />
+
+            {error && (
+              <Text color="red" size="sm" mb="sm">
+                {(error as Error).message}
+              </Text>
+            )}
+
+            <Center>
+              <Button
+                type="submit"
+                loading={loading}
+                mt="sm"
+                mb="sm"
+                fullWidth={false}
+                style={{ width: '200px' }}
+              >
+                Register
+              </Button>
+            </Center>
+
+            <Text ta="center" size="sm">
+              Already have an account?{' '}
+              <Anchor component={Link} to="/login">
+                Sign In
+              </Anchor>
             </Text>
-          )}
-
-          <Button fullWidth type="submit" loading={loading} mb="md">
-            REGISTER
-          </Button>
-
-          <Text ta="center" size="sm">
-            Already have an account?{' '}
-            <Anchor component={Link} to="/login">
-              Login
-            </Anchor>
-          </Text>
-        </form>
-      </Paper>
+          </form>
+        </Paper>
+      </div>
     </Center>
   );
 }
