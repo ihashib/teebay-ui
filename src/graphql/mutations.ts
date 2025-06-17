@@ -50,3 +50,22 @@ export const UPDATE_PRODUCT_MUTATION = gql`
     }
   }
 `;
+
+export const BUY_PRODUCT = gql`
+  mutation BuyProduct($id: ID!) {
+    buyProduct(id: $id) {
+      id
+      type
+    }
+  }
+`;
+
+export const RENT_PRODUCT = gql`
+  mutation RentProduct($id: ID!, $from: String!, $to: String!) {
+    rentProduct(id: $id, from: $from, to: $to) {
+      id
+      rentStart
+      rentEnd
+    }
+  }
+`;

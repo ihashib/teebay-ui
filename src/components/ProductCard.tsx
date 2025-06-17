@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Card, Image, Text, Group, Button, Modal } from '@mantine/core';
+import { Card, Image, Text, Group, Button, Modal, Stack} from '@mantine/core';
 import { useMutation } from '@apollo/client';
 import { DELETE_PRODUCT } from '../graphql/mutations';
-import { GET_MY_PRODUCTS } from '../graphql/queries';
 import { useNavigate } from 'react-router-dom';
+import { DatePickerInput } from '@mantine/dates';
+import { BUY_PRODUCT } from '../graphql/mutations';
+import { RENT_PRODUCT } from '../graphql/mutations';
 
 interface ProductCardProps {
   product: {
@@ -23,6 +25,22 @@ export default function ProductCard({ product, refetch, showActions = false }: P
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+  const [isRentModalOpen, setIsRentModalOpen] = useState(false);
+  const [dates, setDates] = useState<{ from: string | null; to: string | null }>({
+    from: null,
+    to: null,
+  });
+
+  const openBuyModal = () => setIsBuyModalOpen(true);
+  const closeBuyModal = () => setIsBuyModalOpen(false);
+  const openRentModal = () => setIsRentModalOpen(true);
+  const closeRentModal = () => setIsRentModalOpen(false);
+
+  const [buyProduct, { loading: buyLoading, error: buyError }] = useMutation(BUY_PRODUCT);
+  const [rentProduct, { loading: rentLoading, error: rentError }] = useMutation(RENT_PRODUCT);
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [deleteProduct, { loading }] = useMutation(DELETE_PRODUCT, {
     variables: { productId: product.id },
@@ -39,8 +57,6 @@ export default function ProductCard({ product, refetch, showActions = false }: P
       });
     },
   });
-
-  const openModal = () => setIsModalOpen(true);
 
   const handleDeleteClick = () => {
     setIsModalOpen(true);
@@ -61,6 +77,45 @@ export default function ProductCard({ product, refetch, showActions = false }: P
   const handleCancelDelete = () => {
     setIsModalOpen(false); 
   };
+
+  const handleConfirmBuy = async () => {
+    try {
+      await buyProduct({ variables: { id: product.id } });
+      setIsBuyModalOpen(false);
+    } catch (error) {
+      console.error('Error buying product:', error);
+      if (error instanceof Error) {
+        alert(error.message); 
+      } else {
+        alert('An unexpected error occurred.');
+      }
+    }
+  };
+
+const handleConfirmRent = async () => {
+  if (dates.from && dates.to) {
+    const formattedFrom = new Date(dates.from).toISOString(); 
+    const formattedTo = new Date(dates.to).toISOString();
+
+    try {
+      await rentProduct({
+        variables: {
+          id: product.id,
+          from: formattedFrom,
+          to: formattedTo,
+        },
+      });
+      setIsRentModalOpen(false);
+    } catch (error) {
+      console.error('Error renting product:', error);
+      if (error instanceof Error) {
+        alert(error.message); 
+      } else {
+        alert('An unexpected error occurred.');
+      }
+    }
+  }
+};
 
   return (
     <Card shadow="sm" p="lg" radius="md" withBorder>
@@ -96,13 +151,14 @@ export default function ProductCard({ product, refetch, showActions = false }: P
       </Group>
 
       <Group mt="sm" gap="xs">
-        <Button size="xs" onClick={() => navigate(`/products/buy/${product.id}`)}>
-          Buy
-        </Button>
-        <Button size="xs" onClick={() => navigate(`/products/rent/${product.id}`)}>
-          Rent
-        </Button>
-      </Group>
+      <Button size="xs" onClick={openBuyModal}>
+        Buy
+      </Button>
+
+      <Button size="xs" onClick={openRentModal}>
+        Rent
+      </Button>
+    </Group>
 
       {/* Confirmation Modal */}
       <Modal
@@ -123,6 +179,55 @@ export default function ProductCard({ product, refetch, showActions = false }: P
             loading={isDeleting}
           >
             Delete
+          </Button>
+        </Group>
+      </Modal>
+
+      <Modal opened={isBuyModalOpen} onClose={() => { closeBuyModal(); setErrorMessage(null); }} title="Confirm Purchase" centered>
+        <Text size="sm">
+          Are you sure you want to purchase <strong>{product.title}</strong> for{' '}
+          <strong>${product.price.toFixed(2)}</strong>?
+        </Text>
+        {errorMessage && <Text color="red" mt="md">{errorMessage}</Text>}
+        <Group mt="md">
+          <Button variant="outline" onClick={closeBuyModal}>
+            Cancel
+          </Button>
+          <Button color="green" onClick={handleConfirmBuy} loading={buyLoading}>
+            Confirm Purchase
+          </Button>
+        </Group>
+      </Modal>
+
+      <Modal opened={isRentModalOpen} onClose={() => { closeRentModal(); setErrorMessage(null); }} title="Select Rental Dates" centered>
+        <Text size="sm">
+          Are you sure you want to rent <strong>{product.title}</strong> for{' '}
+          <strong>${product.rentPrice}/{product.rentUnit.toLowerCase()}</strong>?
+        </Text>
+        <Stack mt="md">
+          <DatePickerInput
+            label="From"
+            placeholder="Pick start date"
+            value={dates.from}
+            onChange={(value) => setDates((prev) => ({ ...prev, from: value }))}
+            required
+            dropdownType="modal"
+          />
+          <DatePickerInput
+            label="To"
+            placeholder="Pick end date"
+            value={dates.to}
+            onChange={(value) => setDates((prev) => ({ ...prev, to: value }))}
+            required
+            dropdownType="modal"
+          />
+        </Stack>
+        <Group mt="md">
+          <Button variant="outline" onClick={closeRentModal}>
+            Cancel
+          </Button>
+          <Button color="green" onClick={handleConfirmRent} loading={rentLoading}>
+            Confirm Rent
           </Button>
         </Group>
       </Modal>

@@ -5,7 +5,8 @@ import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AddProductWizard from './pages/AddProductWizard';
 import EditProduct from './pages/EditProduct';
-
+import BuyProduct from './pages/BuyProduct'; 
+import RentProduct from './pages/RentProduct'; 
 export default function App() {
   return (
     <Routes>
@@ -21,13 +22,30 @@ export default function App() {
         }
       />
 
-      <Route path="/products/add" element={<AddProductWizard />} />
+      <Route path="/products/add" element={<ProtectedRoute><AddProductWizard /></ProtectedRoute>} />
 
       <Route
         path="/products/edit/:productId"
         element={
           <ProtectedRoute>
             <EditProduct />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/products/buy/:productId"
+        element={
+          <ProtectedRoute>
+            <BuyProduct />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/products/rent/:productId"
+        element={
+          <ProtectedRoute>
+            <RentProduct />
           </ProtectedRoute>
         }
       />
