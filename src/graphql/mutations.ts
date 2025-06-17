@@ -1,16 +1,16 @@
-import { gql } from '@apollo/client';
+import { gql } from '@apollo/client'
 
 export const LOGIN_MUTATION = gql`
   mutation Login($input: LoginInput!) {
     login(input: $input)
   }
-`;
+`
 
 export const DELETE_PRODUCT = gql`
   mutation DeleteProduct($productId: ID!) {
     deleteProduct(productId: $productId)
   }
-`;
+`
 
 export const REGISTER_MUTATION = gql`
   mutation Register($input: UserDto!) {
@@ -22,7 +22,7 @@ export const REGISTER_MUTATION = gql`
       userType
     }
   }
-`;
+`
 
 export const CREATE_PRODUCT_MUTATION = gql`
   mutation CreateProduct($input: ProductInput!) {
@@ -35,7 +35,7 @@ export const CREATE_PRODUCT_MUTATION = gql`
       }
     }
   }
-`;
+`
 
 export const UPDATE_PRODUCT_MUTATION = gql`
   mutation UpdateProduct($input: ProductInput!) {
@@ -49,7 +49,7 @@ export const UPDATE_PRODUCT_MUTATION = gql`
       rentUnit
     }
   }
-`;
+`
 
 export const BUY_PRODUCT = gql`
   mutation BuyProduct($id: ID!) {
@@ -58,7 +58,7 @@ export const BUY_PRODUCT = gql`
       type
     }
   }
-`;
+`
 
 export const RENT_PRODUCT = gql`
   mutation RentProduct($id: ID!, $from: String!, $to: String!) {
@@ -68,4 +68,4 @@ export const RENT_PRODUCT = gql`
       rentEnd
     }
   }
-`;
+`

@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from '@apollo/client'
 
 export const GET_ALL_PRODUCTS = gql`
   query GetAllProducts {
@@ -15,7 +15,7 @@ export const GET_ALL_PRODUCTS = gql`
       }
     }
   }
-`;
+`
 
 export const GET_MY_PRODUCTS = gql`
   query GetMyProducts {
@@ -28,7 +28,7 @@ export const GET_MY_PRODUCTS = gql`
       rentUnit
     }
   }
-`;
+`
 
 export const GET_MY_ORDERS = gql`
   query GetMyOrders {
@@ -47,7 +47,7 @@ export const GET_MY_ORDERS = gql`
       }
     }
   }
-`;
+`
 
 export const GET_CURRENT_USER = gql`
   query GetCurrentUser {
@@ -61,7 +61,7 @@ export const GET_CURRENT_USER = gql`
       phoneNumber
     }
   }
-`;
+`
 
 export const GET_PRODUCT_BY_ID = gql`
   query GetProductById($productId: ID!) {
@@ -81,4 +81,59 @@ export const GET_PRODUCT_BY_ID = gql`
       }
     }
   }
-`;
+`
+
+export const GET_MY_BOUGHT_ORDERS = gql`
+  query GetMySoldProducts {
+    buyerBoughtOrders {
+      id
+      product {
+        title
+      }
+      type
+    }
+  }
+`
+
+export const GET_MY_SOLD_PRODUCTS = gql`
+  query GetMySoldProducts {
+    ownerSoldBoughtOrders {
+      id
+      product {
+        title
+      }
+      buyer {
+        email
+      }
+    }
+  }
+`
+
+export const GET_MY_BORROWED_PRODUCTS = gql`
+  query GetMyBorrowedProducts {
+    buyerRentedOrders {
+      id
+      product {
+        title
+      }
+      rentStart
+      rentEnd
+    }
+  }
+`
+
+export const GET_MY_LENT_PRODUCTS = gql`
+  query buyerRentedOrders {
+    ownerSoldRentedOrders {
+      id
+      product {
+        title
+      }
+      buyer {
+        email
+      }
+      rentStart
+      rentEnd
+    }
+  }
+`

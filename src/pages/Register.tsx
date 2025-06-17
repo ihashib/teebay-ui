@@ -1,4 +1,4 @@
-import { useForm } from '@mantine/form';
+import { useForm } from '@mantine/form'
 import {
   TextInput,
   PasswordInput,
@@ -10,25 +10,25 @@ import {
   Center,
   Grid,
   Checkbox,
-} from '@mantine/core';
-import { Link, useNavigate } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
-import { REGISTER_MUTATION } from '../graphql/mutations';
+} from '@mantine/core'
+import { Link, useNavigate } from 'react-router-dom'
+import { useMutation } from '@apollo/client'
+import { REGISTER_MUTATION } from '../graphql/mutations'
 
 interface RegisterFormValues {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName: string;
-  address: string;
-  phoneNumber: string;
-  userType: 'USER' | 'ADMIN';
+  email: string
+  password: string
+  confirmPassword: string
+  firstName: string
+  lastName: string
+  address: string
+  phoneNumber: string
+  userType: 'USER' | 'ADMIN'
 }
 
 export default function Register() {
-  const navigate = useNavigate();
-  const [register, { loading, error }] = useMutation(REGISTER_MUTATION);
+  const navigate = useNavigate()
+  const [register, { loading, error }] = useMutation(REGISTER_MUTATION)
   const form = useForm<RegisterFormValues>({
     initialValues: {
       email: '',
@@ -41,31 +41,30 @@ export default function Register() {
       userType: 'USER',
     },
     validate: {
-      email: (v) =>
-        /^\S+@\S+\.\S+$/.test(v) ? null : 'Invalid email format', 
+      email: (v) => (/^\S+@\S+\.\S+$/.test(v) ? null : 'Invalid email format'),
       phoneNumber: (v) =>
-        /^[0-9]{11}$/.test(v) ? null : 'Phone number must be 10 digits', 
+        /^[0-9]{11}$/.test(v) ? null : 'Phone number must be 10 digits',
       password: (v) =>
-        v.length >= 6 ? null : 'Password must be at least 6 characters', 
+        v.length >= 6 ? null : 'Password must be at least 6 characters',
       firstName: (v) => (v ? null : 'First name is required'),
       lastName: (v) => (v ? null : 'Last name is required'),
       address: (v) => (v ? null : 'Address is required'),
       confirmPassword: (v, values) =>
         v === values.password ? null : 'Passwords must match',
     },
-  });
+  })
 
   const handleSubmit = async (values: RegisterFormValues) => {
-  try {
-    const { confirmPassword, ...restOfValues } = values;
+    try {
+      const { confirmPassword, ...restOfValues } = values
 
-    await register({
-      variables: { input: restOfValues }, 
-    });
-    
-    navigate('/login');
-  } catch (err) {}
-};
+      await register({
+        variables: { input: restOfValues },
+      })
+
+      navigate('/login')
+    } catch (err) {}
+  }
 
   return (
     <Center style={{ width: '100%', height: '100vh' }}>
@@ -73,7 +72,12 @@ export default function Register() {
         <Title order={2} mb="lg" style={{ textAlign: 'center' }}>
           SIGN UP
         </Title>
-        <Paper radius="md" withBorder p="xl" style={{ maxWidth: 650, width: '100%' }}>
+        <Paper
+          radius="md"
+          withBorder
+          p="xl"
+          style={{ maxWidth: 650, width: '100%' }}
+        >
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <Grid gutter="sm">
               <Grid.Col span={6}>
@@ -169,5 +173,5 @@ export default function Register() {
         </Paper>
       </div>
     </Center>
-  );
+  )
 }

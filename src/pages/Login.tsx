@@ -1,4 +1,4 @@
-import { useForm } from '@mantine/form';
+import { useForm } from '@mantine/form'
 import {
   TextInput,
   PasswordInput,
@@ -8,41 +8,40 @@ import {
   Text,
   Anchor,
   Center,
-} from '@mantine/core';
-import { useNavigate, Link } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
-import { LOGIN_MUTATION } from '../graphql/mutations';
+} from '@mantine/core'
+import { useNavigate, Link } from 'react-router-dom'
+import { useMutation } from '@apollo/client'
+import { LOGIN_MUTATION } from '../graphql/mutations'
 
 interface LoginFormValues {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [login, { loading, error }] = useMutation(LOGIN_MUTATION);
+  const navigate = useNavigate()
+  const [login, { loading, error }] = useMutation(LOGIN_MUTATION)
   const form = useForm<LoginFormValues>({
     initialValues: { email: '', password: '' },
     validate: {
-      email: (value) =>
-        /^\S+@\S+\.\S+$/.test(value) ? null : 'Invalid email',
+      email: (value) => (/^\S+@\S+\.\S+$/.test(value) ? null : 'Invalid email'),
       password: (value) =>
         value.length >= 3 ? null : 'Password must be at least 3 characters',
     },
-  });
+  })
 
   const handleSubmit = async (values: LoginFormValues) => {
     try {
       const { data } = await login({
         variables: { input: values },
-      });
-      localStorage.setItem('authToken', data.login);
+      })
+      localStorage.setItem('authToken', data.login)
       // Redirect to dashboard and set the view to 'myProducts'
-      navigate('/dashboard', { state: { view: 'myProducts' } });
+      navigate('/dashboard', { state: { view: 'myProducts' } })
     } catch {
       // error will appear below
     }
-  };
+  }
 
   return (
     <Center style={{ width: '100%', height: '100vh' }}>
@@ -93,5 +92,5 @@ export default function Login() {
         </form>
       </Paper>
     </Center>
-  );
+  )
 }

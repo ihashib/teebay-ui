@@ -1,14 +1,14 @@
-import { Card, Text, Group, Badge } from '@mantine/core';
+import { Card, Text, Group, Badge } from '@mantine/core'
 
 interface OrderCardProps {
   order: {
-    id: string;
-    product: { title: string };
-    type: 'BUY' | 'RENT';
-    rentStart?: string;
-    rentEnd?: string;
-    buyer: { email: string };
-  };
+    id: string
+    product: { title: string }
+    type: 'BUY' | 'RENT'
+    rentStart?: string
+    rentEnd?: string
+    buyer: { email: string }
+  }
 }
 
 export default function OrderCard({ order }: OrderCardProps) {
@@ -34,5 +34,5 @@ export default function OrderCard({ order }: OrderCardProps) {
         Buyer: {order.buyer.email}
       </Text>
     </Card>
-  );
+  )
 }
