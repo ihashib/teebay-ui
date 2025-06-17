@@ -37,7 +37,8 @@ export default function Login() {
         variables: { input: values },
       });
       localStorage.setItem('authToken', data.login);
-      navigate('/'); // redirect to dashboard
+      // Redirect to dashboard and set the view to 'myProducts'
+      navigate('/dashboard', { state: { view: 'myProducts' } });
     } catch {
       // error will appear below
     }

@@ -48,3 +48,37 @@ export const GET_MY_ORDERS = gql`
     }
   }
 `;
+
+export const GET_CURRENT_USER = gql`
+  query GetCurrentUser {
+    getCurrentUser {
+      id
+      email
+      firstName
+      lastName
+      userType
+      address
+      phoneNumber
+    }
+  }
+`;
+
+export const GET_PRODUCT_BY_ID = gql`
+  query GetProductById($productId: ID!) {
+    productById(productId: $productId) {
+      id
+      title
+      description
+      price
+      rentPrice
+      rentUnit
+      categories
+      owner {
+        id
+        email
+        firstName
+        lastName
+      }
+    }
+  }
+`;

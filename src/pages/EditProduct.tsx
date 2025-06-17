@@ -2,67 +2,78 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_PRODUCT_BY_ID } from '../graphql/queries';  
-import { UPDATE_PRODUCT } from '../graphql/mutations'; 
-import { TextInput, NumberInput, Select, Button, Box, Title, Group, Textarea, Text } from '@mantine/core';
+import { UPDATE_PRODUCT_MUTATION } from '../graphql/mutations'; 
+import { TextInput, NumberInput, Select, Button, Box, Title, Group, Textarea, Text, MultiSelect} from '@mantine/core';
 
-const EditProduct = () => {
-  const { productId } = useParams();  // Get productId from the URL
+type FormData = {
+  title: string;
+  description: string;
+  price: number;
+  rentPrice: number;
+  rentUnit: string;
+  categories: string[];
+};
+
+export default function EditProduct() {
+  const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
 
-  // Fetch the product details using the productId
   const { data, loading, error } = useQuery(GET_PRODUCT_BY_ID, {
     variables: { productId },
   });
 
-  // Mutation to update the product
-  const [updateProduct] = useMutation(UPDATE_PRODUCT);
+  const [updateProduct] = useMutation(UPDATE_PRODUCT_MUTATION);
 
-  // State to hold the form data
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
     price: 0,
     rentPrice: 0,
     rentUnit: '',
-    category: '',
+    categories: [],
   });
 
-  // Populate form data when the product data is fetched
   useEffect(() => {
-    if (data) {
-      const product = data.product;
+    if (data?.productById) {
+      const p = data.productById;
       setFormData({
-        title: product.title,
-        description: product.description,
-        price: product.price,
-        rentPrice: product.rentPrice,
-        rentUnit: product.rentUnit,
-        category: product.category,
+        title: p.title,
+        description: p.description || '',
+        price: p.price,
+        rentPrice: p.rentPrice,
+        rentUnit: p.rentUnit,
+        categories: p.categories,
       });
     }
   }, [data]);
 
-  const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleChange = (field: keyof FormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
     try {
       await updateProduct({
         variables: {
-          productId,
-          input: formData,  // Send the updated product data
+          input: {
+            id: productId,                  
+            title: formData.title,
+            description: formData.description,
+            price: formData.price,
+            rentPrice: formData.rentPrice,
+            rentUnit: formData.rentUnit,
+            categories: formData.categories,
+          },
         },
       });
-      navigate('/dashboard');  // Redirect to dashboard after update
-    } catch (error) {
-      console.error('Error updating product:', error);
+      navigate('/dashboard', { state: { view: 'myProducts' } });
+    } catch (err) {
+      console.error('Update failed', err);
     }
   };
 
-  // Show loading or error message
   if (loading) return <Text>Loading...</Text>;
-  if (error) return <Text color="red">{error.message}</Text>;
+  if (error)   return <Text color="red">{error.message}</Text>;
 
   return (
     <Box style={{ maxWidth: 600 }} mx="auto" py="xl">
@@ -99,11 +110,18 @@ const EditProduct = () => {
           data={['DAY', 'WEEK', 'MONTH']}
           required
         />
-        <Select
-          label="Category"
-          value={formData.category}
-          onChange={(value) => handleChange('category', value)}
-          data={['ELECTRONICS', 'FURNITURE', 'HOME_APPLIANCES', 'SPORTING_GOODS', 'OUTDOOR', 'TOY']}
+        <MultiSelect
+          label="Categories"
+          data={[
+            'ELECTRONICS',
+            'FURNITURE',
+            'HOME_APPLIANCES',
+            'SPORTING_GOODS',
+            'OUTDOOR',
+            'TOYS',
+          ]}
+          value={formData.categories}
+          onChange={(val) => handleChange('categories', val)}
           required
         />
       </Box>
@@ -114,5 +132,3 @@ const EditProduct = () => {
     </Box>
   );
 };
-
-export default EditProduct;

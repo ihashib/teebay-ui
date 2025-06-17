@@ -15,10 +15,11 @@ interface ProductCardProps {
     rentUnit: string;
     owner: { id: string; email: string };
   };
-  refetch: () => void; // Add refetch as a prop
+  refetch: () => void; 
+  showActions?: boolean; 
 }
 
-export default function ProductCard({ product, refetch }: ProductCardProps) {
+export default function ProductCard({ product, refetch, showActions = false }: ProductCardProps) {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -26,7 +27,7 @@ export default function ProductCard({ product, refetch }: ProductCardProps) {
   const [deleteProduct, { loading }] = useMutation(DELETE_PRODUCT, {
     variables: { productId: product.id },
     update(cache) {
-      // Optimistically update the cache if needed
+      // update the cache if needed
       cache.modify({
         fields: {
           myProducts(existingRefs = [], { readField }) {
@@ -39,16 +40,18 @@ export default function ProductCard({ product, refetch }: ProductCardProps) {
     },
   });
 
+  const openModal = () => setIsModalOpen(true);
+
   const handleDeleteClick = () => {
-    setIsModalOpen(true); // Open confirmation modal
+    setIsModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteProduct(); // Perform the deletion mutation
-      refetch(); // Refetch "My Products" after deletion
-      setIsModalOpen(false); // Close modal after deletion
+      await deleteProduct(); 
+      refetch(); 
+      setIsModalOpen(false); 
     } catch (error) {
       console.error('Error deleting product:', error);
     }
@@ -56,13 +59,11 @@ export default function ProductCard({ product, refetch }: ProductCardProps) {
   };
 
   const handleCancelDelete = () => {
-    setIsModalOpen(false); // Close modal if user cancels
+    setIsModalOpen(false); 
   };
 
   return (
     <Card shadow="sm" p="lg" radius="md" withBorder>
-      <Image src="/placeholder.png" height={160} alt={product.title} />
-
       <Text fw={500} fz="lg" mt="md">
         {product.title}
       </Text>
@@ -75,21 +76,22 @@ export default function ProductCard({ product, refetch }: ProductCardProps) {
         <Text fw={700}>${product.price.toFixed(2)}</Text>
 
         <Group gap="xs">
-          <Button
-            size="xs"
-            variant="light"
-            onClick={() => navigate(`/products/edit/${product.id}`)}
-          >
-            Edit
-          </Button>
-          <Button
-            size="xs"
-            color="red"
-            loading={loading}
-            onClick={handleDeleteClick}
-          >
-            Delete
-          </Button>
+           {showActions && (
+            <>
+              <Button size="xs" variant="outline" onClick={() => navigate(`/products/edit/${product.id}`)}>
+                Edit
+              </Button>
+
+              <Button
+                size="xs"
+                color="red"
+                loading={loading}
+                onClick={handleDeleteClick}
+              >
+                Delete
+              </Button>
+          </>
+          )}
         </Group>
       </Group>
 

@@ -11,17 +11,28 @@ import { useNavigate } from 'react-router-dom';
 export default function Dashboard() {
   const location = useLocation(); // Get the state passed during navigation
   const [view, setView] = useState<string>('allProducts');
-  const { data: myProd, loading: myProdLoading, refetch } = useQuery(GET_MY_PRODUCTS);
-  const { data: allProd, loading: allProdLoading } = useQuery(GET_ALL_PRODUCTS);
+  const { data: myProd, loading: myProdLoading, refetch: refetchMy } = useQuery(GET_MY_PRODUCTS);
+  const { data: allProd, loading: allProdLoading,  refetch: refetchAll } = useQuery(GET_ALL_PRODUCTS);
   const { data: myOrders, loading: ordersLoading } = useQuery(GET_MY_ORDERS);
   const navigate = useNavigate();
+
+  // Logout handler clears auth token and redirects to login page
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   // If state is passed via navigate, use it to set the view
   useEffect(() => {
     if (location.state?.view) {
-      setView(location.state.view);  // Set view to 'myProducts' if passed
+      setView(location.state.view);
+      if (location.state.view === 'allProducts') {
+        refetchAll();
+      } else if (location.state.view === 'myProducts') {
+        refetchMy();
+      }
     }
-  }, [location.state]);
+  }, [location.state, refetchAll, refetchMy]);
 
   if (myProdLoading || allProdLoading || ordersLoading) {
     return (
@@ -31,32 +42,34 @@ export default function Dashboard() {
     );
   }
 
-  const handleViewChange = (view: string) => {
-    setView(view);
-  };
+  const handleViewChange = (newView: string) => {
+    setView(newView);
+    if (newView === 'allProducts') refetchAll();
+    if (newView === 'myProducts') refetchMy();
+  }
 
   return (
     <div style={{ padding: '16px' }}>
-      {/* Hamburger Menu */}
-      <Menu shadow="md" width={120} position="bottom-start">
-        <Menu.Target>
-          <Button variant="subtle" leftSection={<IconMenu2 size={18} />}>
-            Menu
-          </Button>
-        </Menu.Target>
-        <Menu.Dropdown>
-          <Menu.Item onClick={() => handleViewChange('allProducts')}>All Products</Menu.Item>
-          <Menu.Item onClick={() => handleViewChange('myProducts')}>My Products</Menu.Item>
-          <Menu.Item onClick={() => handleViewChange('history')}>History</Menu.Item>
-        </Menu.Dropdown>
-      </Menu>
+      <Group justify="space-between" align="center" mb="md">
+        <Menu shadow="md" width={140} position="bottom-start">
+          <Menu.Target>
+            <Button variant="subtle" leftSection={<IconMenu2 size={18} />}>Menu</Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item onClick={() => handleViewChange('allProducts')}>All Products</Menu.Item>
+            <Menu.Item onClick={() => handleViewChange('myProducts')}>My Products</Menu.Item>
+            <Menu.Item onClick={() => handleViewChange('history')}>History</Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+        <Button color="red" variant="outline" onClick={handleLogout}>Logout</Button>
+      </Group>
 
       {/* Page Content */}
       {view === 'allProducts' && (
         <Stack gap="xl" p="md">
           <Title order={3}>All Products</Title>
           {allProd.products.map((p: any) => (
-            <ProductCard key={p.id} product={p} refetch={refetch} />
+            <ProductCard key={p.id} product={p} refetch={refetchMy} />
           ))}
         </Stack>
       )}
@@ -68,7 +81,7 @@ export default function Dashboard() {
             <Button onClick={() => navigate('/products/add')}>Add Product</Button>
           </Group>
           {myProd.userProducts.map((p: any) => (
-            <ProductCard key={p.id} product={p} refetch={refetch} />
+            <ProductCard key={p.id} product={p} refetch={refetchMy} showActions />
           ))}
         </Stack>
       )}

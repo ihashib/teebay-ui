@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AddProductWizard from './pages/AddProductWizard';
+import EditProduct from './pages/EditProduct';
 
 export default function App() {
   return (
@@ -21,6 +22,16 @@ export default function App() {
       />
 
       <Route path="/products/add" element={<AddProductWizard />} />
+
+      <Route
+        path="/products/edit/:productId"
+        element={
+          <ProtectedRoute>
+            <EditProduct />
+          </ProtectedRoute>
+        }
+      />
+
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
