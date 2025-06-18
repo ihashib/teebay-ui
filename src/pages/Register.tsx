@@ -8,8 +8,7 @@ import {
   Text,
   Anchor,
   Center,
-  Grid,
-  Checkbox,
+  Grid
 } from '@mantine/core'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation } from '@apollo/client'

@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Card, Image, Text, Group, Button, Modal, Stack } from '@mantine/core'
+import { useState } from 'react'
+import { Card, Text, Group, Button, Modal, Stack } from '@mantine/core'
 import { useMutation } from '@apollo/client'
 import { DELETE_PRODUCT } from '../graphql/mutations'
 import { useNavigate } from 'react-router-dom'
@@ -50,9 +50,9 @@ export default function ProductCard({
   const closeRentModal = () => setIsRentModalOpen(false)
 
   // mutations for buying, renting, and deleting products
-  const [buyProduct, { loading: buyLoading, error: buyError }] =
+  const [buyProduct, { loading: buyLoading}] =
     useMutation(BUY_PRODUCT)
-  const [rentProduct, { loading: rentLoading, error: rentError }] =
+  const [rentProduct, { loading: rentLoading}] =
     useMutation(RENT_PRODUCT)
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)

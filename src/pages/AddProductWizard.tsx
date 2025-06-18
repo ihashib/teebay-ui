@@ -12,7 +12,7 @@ import {
   Select,
 } from '@mantine/core'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, gql } from '@apollo/client'
+import { useMutation} from '@apollo/client'
 import { CREATE_PRODUCT_MUTATION } from '../graphql/mutations'
 import { GET_MY_PRODUCTS } from '../graphql/queries'
 
@@ -143,7 +143,7 @@ export default function AddProductWizard() {
     })
     if (!isStepValid()) return
     try {
-      const { data } = await createProduct({
+      const {} = await createProduct({
         variables: { input: formData },
       })
       navigate('/dashboard', { state: { view: 'myProducts' } })
